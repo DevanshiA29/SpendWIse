@@ -53,7 +53,8 @@ export async function updateDefaultAccount(accountId){
 export async function getAccountWithTransactions(accountId){
     const { userId } = await auth();
           if (!userId) throw new Error("Unauthorized");
-        
+        console.log("CLERK KEY:", process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+console.log("SECRET KEY:", process.env.CLERK_SECRET_KEY);
           const user = await db.user.findUnique({
             where: { clerkUserId: userId },
           });

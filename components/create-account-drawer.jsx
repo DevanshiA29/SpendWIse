@@ -137,7 +137,7 @@ export function CreateAccountDrawer({ children }) {
                     >
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800">
+                    <SelectContent className="rounded-xl bg-slate-50 border-slate-200 dark:border-slate-800">
                       <SelectItem value="CURRENT" className="rounded-lg">Current</SelectItem>
                       <SelectItem value="SAVINGS" className="rounded-lg">Savings</SelectItem>
                     </SelectContent>
