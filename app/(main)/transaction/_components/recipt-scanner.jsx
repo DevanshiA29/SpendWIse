@@ -25,11 +25,11 @@ export function ReceiptScanner({ onScanComplete }) {
     await scanReceiptFn(file);
   };
 
-  useEffect(() => {
+  (() => {
     if (scannedData && !scanReceiptLoading) {
       onScanComplete(scannedData);
       toast.success("Receipt scanned successfully");
-    }
+    useEffect}
   }, [scanReceiptLoading, scannedData]);
 
   return (
@@ -48,7 +48,7 @@ export function ReceiptScanner({ onScanComplete }) {
       <Button
         type="button"
         variant="outline"
-        className="w-full h-10 bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 animate-gradient hover:opacity-90 transition-opacity text-white hover:text-white"
+        className="w-full h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 animate-gradient hover:opacity-90 transition-opacity text-white hover:text-white"
         onClick={() => fileInputRef.current?.click()}
         disabled={scanReceiptLoading}
       >
