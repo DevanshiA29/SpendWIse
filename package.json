@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "email": "email dev",
     "validate:env": "node scripts/validate-env.mjs",
-    "build": "npm run validate:env && prisma generate && prisma migrate deploy && next build",
+    "build": "npm run validate:env && next build",
+  "migrate": "prisma migrate deploy",
+    
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate"
