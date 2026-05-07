@@ -17,18 +17,21 @@ SpendWise is a full‑stack FinTech application that automates expense tracking,
 ## 📸 Screenshots
 
 ### Dashboard Overview
-![Dashboard Screenshot](assets/dashboard.png)
+
+<img src="dashboard.jpg" alt="Dashboard Screenshot" width="600"/>
+
 
 ### Receipt OCR in Action
-![Receipt OCR Screenshot](assets/receipt-ocr.png)
+<img src="Receipt-scan.jpg" alt="AI Receipt Scan" width="600"/>
+
 
 ### Expense Visualization
-![Expense Chart Screenshot](assets/expense-chart.png)
+<img src="insights.jpg" alt="Graphs & Pie" width="600"/>
 
 ### Mobile PWA Interface
-![Mobile PWA Screenshot](assets/mobile-pwa.png)
 
-*(Upload screenshots into an `/assets` folder in your repo and link them here.)*
+<img src="mb.jpg" alt="Mobile Interface Screenshot" height="600"/>
+
 
 ---
 
