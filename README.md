@@ -32,7 +32,8 @@ SpendWise is a full‑stack FinTech application that automates expense tracking,
 
 <img src="mb.jpg" alt="Mobile Interface Screenshot" height="600"/>
 
-###Monthly Insights
+### Monthly Insights
+
 <img src="bm.png" alt="Received on Email" height="600"/>
 
 ---
