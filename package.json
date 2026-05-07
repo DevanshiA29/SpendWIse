@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "email": "email dev",
-    "build": "prisma generate && prisma migrate deploy && next build",
+    "validate:env": "node scripts/validate-env.mjs",
+    "build": "npm run validate:env && prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate"
