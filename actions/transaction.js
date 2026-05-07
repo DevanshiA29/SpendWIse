@@ -248,7 +248,7 @@ export async function scanReceipt(file) {
 For category: choose ONLY from this controlled list, exactly as written:
 
 Income: [Salary, Freelance, Investments, Business, Rental, Other Income]  
-Expense: [Housing, Transportation, Groceries, Utilities, Entertainment, Food, Shopping, Healthcare, Education, Personal Care, Travel, Insurance, Gifts, Bills, Other Expenses]
+Expense: [Housing, Transportation, Groceries, Utilities, Entertainment, Food, Shopping, Healthcare, Education, Personal Care, Travel, Insurance, Gifts & Donations, Bills & Fees, Other Expenses]
 
 If the receipt suggests an income source but does not match exactly, use "Other Income".  
 If the receipt suggests an expense but does not match exactly, use "Other Expenses".  
@@ -282,6 +282,7 @@ If the receipt suggests an expense but does not match exactly, use "Other Expens
     try {
       const data = JSON.parse(cleanedText);
       return {
+        type: data.type,
         amount: parseFloat(data.amount),
         date: new Date(data.date),
         description: data.description,

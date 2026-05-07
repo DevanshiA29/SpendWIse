@@ -90,40 +90,22 @@ const AddTransactionForm = ({accounts , categories ,editMode = false,
     }
   }, [transactionResult, transactionLoading, editMode]);
 
-  // const handleScanComplete = (scannedData) => {
-  //   if (scannedData) {
-  //     console.log(scannedData);
-      
-  //     setValue("amount", scannedData.amount.toString());
-  //     setValue("date", new Date(scannedData.date));
-  //     setValue("description", scannedData.description||"");
-  //     const type = scannedData.type === "Income" ? "Income" : "Expense";
-  // setValue("type", type);
-  //     if (scannedData.category) {
-  //       setValue("category", scannedData.category);
-  //     }
-  //     toast.success("Receipt scanned successfully");
-  //   }
-  // };
-
-  const defaultCategories = [
-  { id: "salary", name: "Salary" },
-  { id: "business", name: "Business" },
-  { id: "shopping", name: "Shopping" },
-  { id: "other-expense", name: "Other Expenses" },
-  { id: "other-income", name: "Other Income" },
-  {id: "freelance" , name:"Freelance"}
-  // ...etc
-];
-
 function normalizeCategory(rawCategory, rawType) {
-  if (!rawCategory) return rawType === "Income" ? "other-income" : "other-expense";
+  if (!rawCategory) return rawType === "INCOME" ? "other-income" : "other-expense";
 
-  const match = defaultCategories.find(
-    c => c.name.toLowerCase() === rawCategory.toLowerCase()
+  const cleanCategory = rawCategory.toLowerCase().trim();
+
+  // Try exact match by name or id
+  let match = categories.find(
+    c => c.name.toLowerCase() === cleanCategory || c.id.toLowerCase() === cleanCategory
   );
 
-  return match ? match.id : rawType === "Income" ? "other-income" : "other-expense";
+  // Fallback: try partial match
+  if (!match) {
+    match = categories.find(c => c.name.toLowerCase().includes(cleanCategory) || cleanCategory.includes(c.name.toLowerCase()));
+  }
+
+  return match ? match.id : rawType === "INCOME" ? "other-income" : "other-expense";
 }
 
 const handleScanComplete = (scannedData) => {
@@ -132,13 +114,13 @@ const handleScanComplete = (scannedData) => {
     return;
   }
 
-  console.log(scannedData); // ✅ will now log
+  console.log(scannedData); 
 
   setValue("amount", scannedData.amount?.toString() ?? "");
   setValue("date", scannedData.date ? new Date(scannedData.date) : new Date());
   setValue("description", scannedData.description || "");
 
-  const type = scannedData.type === "Income" ? "Income" : "Expense";
+  const type = scannedData.type?.toLowerCase() === "income" ? "INCOME" : "EXPENSE";
   setValue("type", type);
 
   const normalizedCategory = normalizeCategory(scannedData.category, type);
@@ -146,6 +128,8 @@ const handleScanComplete = (scannedData) => {
 };
 
     const type =watch("type");
+    const category = watch("category");
+    const accountId = watch("accountId");
     const isRecurring = watch("isRecurring");
     const date = watch("date");
    
@@ -189,8 +173,11 @@ const handleScanComplete = (scannedData) => {
     <div className="space-y-2 p-4 rounded-xl bg-white/70 shadow-sm hover:shadow-md transition-all duration-300">
       <label className="text-sm font-medium text-gray-700">Type</label>
       <Select
-        onValueChange={(value) => setValue("type", value)}
-        defaultValue={type}
+        onValueChange={(value) => {
+          setValue("type", value);
+          setValue("category", "");
+        }}
+        value={type}
       >
         <SelectTrigger className="w-[180px] bg-white/80 border border-blue-200 focus:ring-2 focus:ring-purple-200">
           <SelectValue placeholder="Select type" />
@@ -223,7 +210,7 @@ const handleScanComplete = (scannedData) => {
         <label className="text-sm font-medium text-gray-700">Account</label>
         <Select
           onValueChange={(value) => setValue("accountId", value)}
-          defaultValue={getValues("accountId")}
+          value={accountId}
         >
           <SelectTrigger className="bg-white/80 border border-blue-200 focus:ring-2 focus:ring-purple-200">
             <SelectValue placeholder="Select account" />
@@ -246,7 +233,29 @@ const handleScanComplete = (scannedData) => {
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-white/70 shadow-sm">
   
     {/* CATEGORY + DATE*/}
-    <div className="space-y-2"> <label className="text-sm font-medium">Category</label> <Select onValueChange={(value) => setValue("category", value)} defaultValue={getValues("category")} > <SelectTrigger> <SelectValue placeholder="Select category" /> </SelectTrigger> <SelectContent className="bg-white min-w-0 w-[200px]" > {filteredCategories.map((category) => ( <SelectItem key={category.id} value={category.id}> <span className="flex items-center gap-2"> <span className="text-lg">{categoryIcons[category.name]}</span> {category.name} </span> </SelectItem> ))} </SelectContent> </Select> {errors.category && ( <p className="text-sm text-red-500">{errors.category.message}</p> )} </div>
+    <div className="space-y-2"> 
+      <label className="text-sm font-medium">Category</label> 
+      <Select 
+        key={type} 
+        onValueChange={(value) => setValue("category", value)} 
+        value={category} 
+      > 
+        <SelectTrigger> 
+          <SelectValue placeholder="Select category" /> 
+        </SelectTrigger> 
+        <SelectContent className="bg-white min-w-0 w-[200px]" > 
+          {filteredCategories.map((category) => ( 
+            <SelectItem key={category.id} value={category.id}> 
+              <span className="flex items-center gap-2"> 
+                <span className="text-lg">{categoryIcons[category.name]}</span> 
+                {category.name} 
+              </span> 
+            </SelectItem> 
+          ))} 
+        </SelectContent> 
+      </Select> 
+      {errors.category && ( <p className="text-sm text-red-500">{errors.category.message}</p> )} 
+    </div>
 
     {/* DATE */}
     <div className="space-y-2 p-4 rounded-xl bg-white/70 shadow-sm hover:shadow-md transition-all duration-300">
