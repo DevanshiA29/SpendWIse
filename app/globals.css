@@ -126,3 +126,29 @@ body {
   background-size: 200% 200%;
   animation: gradientMove 3s ease infinite;
 }
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes softGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.8));
+  }
+}
+
+.animate-soft-glow {
+  animation: softGlow 4s ease-in-out infinite;
+}

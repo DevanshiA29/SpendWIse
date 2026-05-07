@@ -243,10 +243,18 @@ export async function scanReceipt(file) {
       - Date (in ISO format)
       - Description or items purchased (brief summary)
       - Merchant/store name
-      - Suggested category (one of: housing,transportation,groceries,utilities,entertainment,food,shopping,healthcare,education,personal,travel,insurance,gifts,bills,other-expense )
-      
+      - Type (string: must be either "Income" or "Expense")
+      - Suggested category For type: decide whether the transaction is an income or an expense.  
+For category: choose ONLY from this controlled list, exactly as written:
+
+Income: [Salary, Freelance, Investments, Business, Rental, Other Income]  
+Expense: [Housing, Transportation, Groceries, Utilities, Entertainment, Food, Shopping, Healthcare, Education, Personal Care, Travel, Insurance, Gifts, Bills, Other Expenses]
+
+If the receipt suggests an income source but does not match exactly, use "Other Income".  
+If the receipt suggests an expense but does not match exactly, use "Other Expenses".  
       Only respond with valid JSON in this exact format:
       {
+        "type": "string",
         "amount": number,
         "date": "ISO date string",
         "description": "string",
@@ -280,6 +288,7 @@ export async function scanReceipt(file) {
         category: data.category,
         merchantName: data.merchantName,
       };
+     
     } catch (parseError) {
       console.error("Error parsing JSON response:", parseError);
       throw new Error("Invalid response format from Gemini");

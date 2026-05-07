@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { Button } from './ui/button'
-import { DivideIcon, LayoutDashboard, PenBox } from 'lucide-react'
+import { DivideIcon, LayoutDashboard, PenBox, Wallet, Sparkles } from 'lucide-react'
 import { checkUser } from '@/lib/checkUser'
 
 const Header = async () => {
@@ -13,10 +13,15 @@ const Header = async () => {
       <nav className='container mx-auto px-4 py-4 flex items-center justify-between'>
         <Link href='/'>
         
-        <Image
-        src={"/logo.png"} alt ="SpendWise logo" height={80} width={200}
-        className="transition-transform duration-500 ease-in-out hover:scale-110 object-contain h-10 w-auto "
-         />
+        <div className="flex items-center gap-2 transition-transform duration-500 ease-in-out hover:scale-110">
+          <div className="relative group">
+            <Wallet className="h-10 w-10 text-blue-600 transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(37,99,235,0.8)]" />
+            <Sparkles className="h-5 w-5 text-pink-500 absolute -top-1 -right-1 animate-pulse" />
+          </div>
+          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 animate-gradient">
+            SpendWise
+          </span>
+        </div>
         </Link>
       
       <div className='flex items-center space-x-4 gap-3'>

@@ -1,7 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import { createTransaction } from '@/actions/transaction'
 import { transactionSchema } from '@/app/lib/schema'
 import useFetch from '@/hooks/use-fetch'
 import React from 'react'
@@ -18,7 +17,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
 import { useEffect } from "react";
 import { toast } from "sonner";
-//  import { createTransaction, updateTransaction } from '@/actions/transaction'
+ import { createTransaction, updateTransaction } from '@/actions/transaction'
 import { ReceiptScanner } from "./recipt-scanner";
 const AddTransactionForm = ({accounts , categories ,editMode = false,
   initialData = null,}) => {
@@ -67,7 +66,7 @@ const AddTransactionForm = ({accounts , categories ,editMode = false,
 
     }=useFetch(editMode ? updateTransaction :createTransaction);
      
-    const onSubmit = (data) => {
+    const onSubmit = async(data) => {
     const formData = {
       ...data,
       amount: parseFloat(data.amount),
@@ -79,22 +78,7 @@ const AddTransactionForm = ({accounts , categories ,editMode = false,
       transactionFn(formData);
     }
   };
-  const handleScanComplete = (scannedData) => {
-    if (scannedData) {
-      setValue("amount", scannedData.amount.toString());
-      setValue("date", new Date(scannedData.date));
-      if (scannedData.description) {
-        setValue("description", scannedData.description);
-      }
-      if (scannedData.category) {
-        setValue("category", scannedData.category);
-      }
-      toast.success("Receipt scanned successfully");
-    }
-  };
-
-
-useEffect(() => {
+  useEffect(() => {
     if (transactionResult?.success && !transactionLoading) {
       toast.success(
         editMode
@@ -105,6 +89,61 @@ useEffect(() => {
       router.push(`/account/${transactionResult.data.accountId}`);
     }
   }, [transactionResult, transactionLoading, editMode]);
+
+  // const handleScanComplete = (scannedData) => {
+  //   if (scannedData) {
+  //     console.log(scannedData);
+      
+  //     setValue("amount", scannedData.amount.toString());
+  //     setValue("date", new Date(scannedData.date));
+  //     setValue("description", scannedData.description||"");
+  //     const type = scannedData.type === "Income" ? "Income" : "Expense";
+  // setValue("type", type);
+  //     if (scannedData.category) {
+  //       setValue("category", scannedData.category);
+  //     }
+  //     toast.success("Receipt scanned successfully");
+  //   }
+  // };
+
+  const defaultCategories = [
+  { id: "salary", name: "Salary" },
+  { id: "business", name: "Business" },
+  { id: "shopping", name: "Shopping" },
+  { id: "other-expense", name: "Other Expenses" },
+  { id: "other-income", name: "Other Income" },
+  {id: "freelance" , name:"Freelance"}
+  // ...etc
+];
+
+function normalizeCategory(rawCategory, rawType) {
+  if (!rawCategory) return rawType === "Income" ? "other-income" : "other-expense";
+
+  const match = defaultCategories.find(
+    c => c.name.toLowerCase() === rawCategory.toLowerCase()
+  );
+
+  return match ? match.id : rawType === "Income" ? "other-income" : "other-expense";
+}
+
+const handleScanComplete = (scannedData) => {
+  if (!scannedData) {
+    toast.error("No data returned from receipt scan");
+    return;
+  }
+
+  console.log(scannedData); // ✅ will now log
+
+  setValue("amount", scannedData.amount?.toString() ?? "");
+  setValue("date", scannedData.date ? new Date(scannedData.date) : new Date());
+  setValue("description", scannedData.description || "");
+
+  const type = scannedData.type === "Income" ? "Income" : "Expense";
+  setValue("type", type);
+
+  const normalizedCategory = normalizeCategory(scannedData.category, type);
+  setValue("category", normalizedCategory);
+};
 
     const type =watch("type");
     const isRecurring = watch("isRecurring");
@@ -128,7 +167,13 @@ useEffect(() => {
   Insurance: "🛡️",
   "Gifts & Donations": "🎁",
   "Bills & Fees": "🧾",
-  "Other Expenses": "📦"
+  "Other Expenses": "📦",
+   "Salary":"💰",
+   "Freelance":"🧑‍💻",
+  "Investments":"📈",
+ "Business":"🏢",
+ "Rental":"🏠",
+ "Other Income":"➕"
 };
 
   return (
@@ -138,7 +183,7 @@ useEffect(() => {
 >
 
   <div className="space-y-6">
-    <ReceiptScanner />
+    { !editMode && <ReceiptScanner onScanComplete={handleScanComplete}/>}
 
     {/* TYPE */}
     <div className="space-y-2 p-4 rounded-xl bg-white/70 shadow-sm hover:shadow-md transition-all duration-300">
@@ -269,6 +314,7 @@ useEffect(() => {
         type="submit"
         className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
         disabled={transactionLoading}
+        onClick={() => router.back()}
       >
         {transactionLoading ? (
           <>

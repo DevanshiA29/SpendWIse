@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import useFetch from "@/hooks/use-fetch";
 import { scanReceipt } from "@/actions/transaction";
+import confetti from "canvas-confetti";
 
 export function ReceiptScanner({ onScanComplete }) {
   const fileInputRef = useRef(null);
@@ -21,16 +22,29 @@ export function ReceiptScanner({ onScanComplete }) {
       toast.error("File size should be less than 5MB");
       return;
     }
-
-    await scanReceiptFn(file);
+const data = await scanReceiptFn(file);
+  if (data) {
+    onScanComplete(data);          // ✅ handleScanComplete runs here
+    toast.success("Receipt scanned successfully");
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  }
   };
 
-  (() => {
+  useEffect(() => {
     if (scannedData && !scanReceiptLoading) {
       onScanComplete(scannedData);
       toast.success("Receipt scanned successfully");
-    useEffect}
-  }, [scanReceiptLoading, scannedData]);
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+   }
+  }, [scanReceiptLoading, scannedData ]);
 
   return (
     <div className="flex items-center gap-4">
@@ -48,7 +62,7 @@ export function ReceiptScanner({ onScanComplete }) {
       <Button
         type="button"
         variant="outline"
-        className="w-full h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 animate-gradient hover:opacity-90 transition-opacity text-white hover:text-white"
+        className="w-full h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 animate-gradient hover:opacity-90 transition-all text-white hover:text-white hover:scale-[1.02] shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)]"
         onClick={() => fileInputRef.current?.click()}
         disabled={scanReceiptLoading}
       >
