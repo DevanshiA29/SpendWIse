@@ -1,7 +1,16 @@
 import "dotenv/config";
 
-const requiredServerEnv = ["DATABASE_URL", "DIRECT_URL"];
-const requiredPublicEnv = ["NEXT_PUBLIC_SUPABASE_URL"];
+const requiredServerEnv = [
+  "DATABASE_URL",
+  "DIRECT_URL",
+  "CLERK_SECRET_KEY",
+  "ARCJET_KEY",
+];
+const requiredPublicEnv = [
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+];
+const recommendedServerEnv = ["GEMINI_API_KEY", "RESEND_API_KEY"];
 const recommendedPublicEnv = [
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY",
@@ -27,7 +36,17 @@ try {
     );
   }
 
-  console.log("Environment variables look good for Prisma + Supabase.");
+  const missingRecommendedServerEnv = recommendedServerEnv.filter(
+    (name) => !process.env[name],
+  );
+
+  if (missingRecommendedServerEnv.length > 0) {
+    console.warn(
+      `Optional integrations disabled until set: ${missingRecommendedServerEnv.join(", ")}`,
+    );
+  }
+
+  console.log("Environment variables look good for production build.");
 } catch (error) {
   console.error("Environment validation failed.");
   console.error(error instanceof Error ? error.message : error);
