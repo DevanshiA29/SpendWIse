@@ -110,10 +110,19 @@ export function TransactionTable({ transactions }) {
 
       if (sortConfig.field === "date") {
         comparison = new Date(a.date) - new Date(b.date);
+        if (comparison === 0) {
+          comparison = new Date(a.createdAt) - new Date(b.createdAt);
+        }
       } else if (sortConfig.field === "amount") {
         comparison = a.amount - b.amount;
+        if (comparison === 0) {
+          comparison = new Date(a.date) - new Date(b.date);
+        }
       } else if (sortConfig.field === "category") {
         comparison = a.category.localeCompare(b.category);
+        if (comparison === 0) {
+          comparison = new Date(a.date) - new Date(b.date);
+        }
       }
 
       return sortConfig.direction === "asc" ? comparison : -comparison;
@@ -305,9 +314,18 @@ export function TransactionTable({ transactions }) {
                     />
                   </TableCell>
 
-                  <TableCell>{format(new Date(t.date), "PP")}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <div className="font-medium">{format(new Date(t.date), "PP")}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {t.isRecurring ? "Auto-posted" : "Manual"}
+                    </div>
+                  </TableCell>
 
-                  <TableCell>{t.description}</TableCell>
+                  <TableCell className="max-w-[260px]">
+                    <div className="truncate font-medium">
+                      {t.description || "Untitled Transaction"}
+                    </div>
+                  </TableCell>
 
                   <TableCell>
                     <span

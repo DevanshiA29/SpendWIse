@@ -3,8 +3,6 @@
 import { auth } from "@clerk/nextjs/server";
 import {db} from "@/lib/prisma"
 import { revalidatePath } from "next/cache";
-import { includes, success } from "zod";
-import transactions from "@/app/(main)/transaction/create/page";
 
 
 const serializeTransaction = (obj) => {
@@ -68,7 +66,7 @@ export async function getAccountWithTransactions(accountId){
     },
     include: {
       transactions: {
-        orderBy: { date: "desc" },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
       },
       _count: {
         select: { transactions: true },

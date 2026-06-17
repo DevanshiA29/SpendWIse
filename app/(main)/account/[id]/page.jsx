@@ -5,8 +5,11 @@ import { TransactionTable } from "../_components/transaction-table";
 import { notFound } from "next/navigation";
 import { AccountChart } from "../_components/account-chart";
 import { formatCurrency } from "@/lib/currency";
+import { processDueRecurringTransactionsForCurrentUser } from "@/actions/recurring";
+import { RefreshCw } from "lucide-react";
 
 export default async function AccountPage({ params }) {
+  await processDueRecurringTransactionsForCurrentUser();
   const accountData = await getAccountWithTransactions(params.id);
 
   if (!accountData) {
@@ -34,6 +37,15 @@ export default async function AccountPage({ params }) {
           </div>
           <p className="text-sm text-muted-foreground">
             {account._count.transactions} Transactions
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+        <div className="flex items-start gap-3">
+          <RefreshCw className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            Recurring transactions due today are checked automatically whenever this account is opened.
           </p>
         </div>
       </div>
