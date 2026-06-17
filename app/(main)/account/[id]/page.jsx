@@ -5,11 +5,11 @@ import { TransactionTable } from "../_components/transaction-table";
 import { notFound } from "next/navigation";
 import { AccountChart } from "../_components/account-chart";
 import { formatCurrency } from "@/lib/currency";
-import { processDueRecurringTransactionsForCurrentUser } from "@/actions/recurring";
+import { processCurrentUserRecurringSafely } from "@/lib/current-user-recurring";
 import { RefreshCw } from "lucide-react";
 
 export default async function AccountPage({ params }) {
-  await processDueRecurringTransactionsForCurrentUser();
+  await processCurrentUserRecurringSafely();
   const accountData = await getAccountWithTransactions(params.id);
 
   if (!accountData) {

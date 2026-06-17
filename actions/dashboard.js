@@ -17,6 +17,11 @@ const serializeTransaction = (obj) => {
   return serialized;
 };
 
+const normalizeAccountName = (name) => {
+  const trimmed = name.trim().replace(/\s+/g, " ");
+  return trimmed ? trimmed.charAt(0).toUpperCase() + trimmed.slice(1) : "";
+};
+
 export async function getUserAccounts() {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
@@ -91,6 +96,11 @@ export async function createAccount(data) {
       throw new Error("User not found");
     }
 
+    const normalizedName = normalizeAccountName(data.name || "");
+    if (!normalizedName) {
+      throw new Error("Account name is required");
+    }
+
     // Convert balance to float before saving
     const balanceFloat = parseFloat(data.balance);
     if (isNaN(balanceFloat)) {
@@ -119,6 +129,7 @@ export async function createAccount(data) {
     const account = await db.account.create({
       data: {
         ...data,
+        name: normalizedName,
         balance: balanceFloat,
         userId: user.id,
         isDefault: shouldBeDefault, // Override the isDefault based on our logic

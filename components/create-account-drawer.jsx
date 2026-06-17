@@ -27,6 +27,11 @@ import { Switch } from "@/components/ui/switch";
 import { createAccount } from "@/actions/dashboard";
 import { accountSchema } from "@/app/lib/schema";
 
+const normalizeAccountName = (name) => {
+  const trimmed = name.trim().replace(/\s+/g, " ");
+  return trimmed ? trimmed.charAt(0).toUpperCase() + trimmed.slice(1) : "";
+};
+
 export function CreateAccountDrawer({ children }) {
   const [open, setOpen] = useState(false);
 
@@ -55,7 +60,10 @@ export function CreateAccountDrawer({ children }) {
   } = useFetch(createAccount);
 
   const onSubmit = async (data) => {
-    await createAccountFn(data);
+    await createAccountFn({
+      ...data,
+      name: normalizeAccountName(data.name),
+    });
   };
 
   useEffect(() => {
@@ -101,9 +109,19 @@ export function CreateAccountDrawer({ children }) {
             </label>
             <Input
               id="name"
-              placeholder="e.g., Main Checking"
+              placeholder="Account name"
+              autoComplete="new-password"
+              autoCorrect="off"
+              autoCapitalize="sentences"
+              spellCheck={false}
               className="h-12 bg-white/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl shadow-sm"
-              {...register("name")}
+              {...register("name", {
+                onBlur: (event) => {
+                  setValue("name", normalizeAccountName(event.target.value), {
+                    shouldValidate: true,
+                  });
+                },
+              })}
             />
             {errors.name && (
               <p className="text-xs border-red-500 focus:ring-red-200 text-red-500 font-medium text-destructive px-1">
