@@ -54,6 +54,7 @@ import { bulkDeleteTransactions } from "@/actions/accounts";
 import useFetch from "@/hooks/use-fetch";
 import { BarLoader } from "react-spinners";
 import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/lib/currency";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -325,8 +326,9 @@ export function TransactionTable({ transactions }) {
                         : "text-green-500"
                     )}
                   >
-                    {t.type === "EXPENSE" ? "-" : "+"}$
-                    {t.amount.toFixed(2)}
+                    {formatCurrency(t.type === "EXPENSE" ? -t.amount : t.amount, {
+                      signed: true,
+                    })}
                   </TableCell>
 
                   <TableCell>

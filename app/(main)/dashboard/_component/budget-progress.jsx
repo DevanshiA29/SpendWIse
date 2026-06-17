@@ -16,6 +16,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { updateBudget } from "@/actions/budget";
+import { formatCurrency } from "@/lib/currency";
 
 export function BudgetProgress({ initialBudget, currentExpenses }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -97,13 +98,13 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
           <div className="flex flex-col sm:flex-row items-center gap-3 bg-muted/30 p-4 rounded-xl border border-muted/50">
             <div className="relative w-full flex-1">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">
-                $
+                Rs.
               </span>
               <Input
                 type="number"
                 value={newBudget}
                 onChange={(e) => setNewBudget(e.target.value)}
-                className="pl-8 bg-white dark:bg-slate-950 h-11 rounded-lg"
+                className="pl-12 bg-white dark:bg-slate-950 h-11 rounded-lg"
                 placeholder="Enter budget amount"
                 autoFocus
                 disabled={isLoading}
@@ -137,7 +138,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
                   Spent This Month
                 </p>
                 <div className="text-4xl font-extrabold tracking-tight text-foreground">
-                  ${currentExpenses.toFixed(2)}
+                  {formatCurrency(currentExpenses)}
                 </div>
               </div>
               <div className="text-right">
@@ -145,7 +146,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
                   Total Budget
                 </p>
                 <div className="text-xl font-bold text-foreground/70">
-                  ${initialBudget.amount.toFixed(2)}
+                  {formatCurrency(initialBudget.amount)}
                 </div>
               </div>
             </div>
@@ -172,11 +173,11 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
                 <span>
                   {percentUsed >= 100 ? (
                     <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400 bg-red-500/10 px-3 py-1 rounded-full font-bold">
-                      <AlertCircle className="h-4 w-4" /> Over budget by ${(currentExpenses - initialBudget.amount).toFixed(2)}
+                      <AlertCircle className="h-4 w-4" /> Over budget by {formatCurrency(currentExpenses - initialBudget.amount)}
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full font-semibold">
-                      ${(initialBudget.amount - currentExpenses).toFixed(2)} remaining
+                      {formatCurrency(initialBudget.amount - currentExpenses)} remaining
                     </span>
                   )}
                 </span>

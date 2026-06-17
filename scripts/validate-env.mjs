@@ -1,4 +1,11 @@
-import "dotenv/config";
+import { existsSync } from "node:fs";
+import { config } from "dotenv";
+
+config({ path: ".env" });
+
+if (existsSync(".env.production.local")) {
+  config({ path: ".env.production.local", override: false });
+}
 
 const requiredServerEnv = [
   "DATABASE_URL",

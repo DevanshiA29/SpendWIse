@@ -19,6 +19,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
  import { createTransaction, updateTransaction } from '@/actions/transaction'
 import { ReceiptScanner } from "./recipt-scanner";
+import { formatCurrency } from "@/lib/currency";
 const AddTransactionForm = ({accounts , categories ,editMode = false,
   initialData = null,}) => {
 
@@ -218,7 +219,7 @@ const handleScanComplete = (scannedData) => {
           <SelectContent className="bg-white">
             {accounts.map((account) => (
               <SelectItem key={account.id} value={account.id}>
-                {account.name} (${parseFloat(account.balance).toFixed(2)})
+                {account.name} ({formatCurrency(account.balance)})
               </SelectItem>
             ))}
             <CreateAccountDrawer>
@@ -323,7 +324,6 @@ const handleScanComplete = (scannedData) => {
         type="submit"
         className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
         disabled={transactionLoading}
-        onClick={() => router.back()}
       >
         {transactionLoading ? (
           <>

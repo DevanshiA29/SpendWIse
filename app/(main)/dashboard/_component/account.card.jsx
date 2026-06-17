@@ -8,6 +8,7 @@ import { ArrowUpRight, ArrowDownRight, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/currency';
 
 const AccountCard = ({ account }) => {
     const { name, type, balance, id, isDefault } = account;
@@ -84,7 +85,7 @@ const AccountCard = ({ account }) => {
                     
                     <div className="mt-4">
                         <div className="text-3xl font-extrabold tracking-tight text-foreground">
-                            ${parseFloat(balance || 0).toFixed(2)}
+                            {formatCurrency(balance)}
                         </div>
                     </div>
                 </div>
