@@ -20,8 +20,15 @@ import { toast } from "sonner";
  import { createTransaction, updateTransaction } from '@/actions/transaction'
 import { ReceiptScanner } from "./recipt-scanner";
 import { formatCurrency } from "@/lib/currency";
-const AddTransactionForm = ({accounts , categories ,editMode = false,
-  initialData = null,}) => {
+const AddTransactionForm = ({
+  accounts,
+  categories,
+  editMode = false,
+  initialData = null,
+  onSuccess,
+  onCancel,
+  compact = false,
+}) => {
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -73,10 +80,14 @@ const AddTransactionForm = ({accounts , categories ,editMode = false,
       amount: parseFloat(data.amount),
     };
 
-    if (editMode) {
-      transactionFn(editId, formData);
-    } else {
-      transactionFn(formData);
+    try {
+      if (editMode) {
+        await transactionFn(editId, formData);
+      } else {
+        await transactionFn(formData);
+      }
+    } catch {
+      // useFetch already surfaces the error to the user.
     }
   };
   useEffect(() => {
@@ -87,9 +98,13 @@ const AddTransactionForm = ({accounts , categories ,editMode = false,
           : "Transaction created successfully"
       );
       reset();
-      router.push(`/account/${transactionResult.data.accountId}`);
+      if (onSuccess) {
+        onSuccess(transactionResult.data);
+      } else {
+        router.push(`/account/${transactionResult.data.accountId}`);
+      }
     }
-  }, [transactionResult, transactionLoading, editMode]);
+  }, [transactionResult, transactionLoading, editMode, onSuccess, reset, router]);
 
 function normalizeCategory(rawCategory, rawType) {
   if (!rawCategory) return rawType === "INCOME" ? "other-income" : "other-expense";
@@ -114,8 +129,6 @@ const handleScanComplete = (scannedData) => {
     toast.error("No data returned from receipt scan");
     return;
   }
-
-  console.log(scannedData); 
 
   setValue("amount", scannedData.amount?.toString() ?? "");
   setValue("date", scannedData.date ? new Date(scannedData.date) : new Date());
@@ -163,15 +176,25 @@ const handleScanComplete = (scannedData) => {
 
   return (
    <form
-  className="space-y-6 p-6 rounded-2xl bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 shadow-xl border border-white/40 backdrop-blur-md animate-fadeIn"
+  className={cn(
+    "rounded-xl border border-slate-200 bg-white shadow-sm animate-fadeIn",
+    compact ? "space-y-4 p-4" : "space-y-6 p-6"
+  )}
   onSubmit={handleSubmit(onSubmit)}
 >
 
-  <div className="space-y-6">
+  <div className={compact ? "space-y-4" : "space-y-6"}>
     { !editMode && <ReceiptScanner onScanComplete={handleScanComplete}/>}
 
+    {transactionLoading && (
+      <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {isRecurring ? "Saving recurring schedule..." : "Saving transaction..."}
+      </div>
+    )}
+
     {/* TYPE */}
-    <div className="space-y-2 p-4 rounded-xl bg-white/70 shadow-sm hover:shadow-md transition-all duration-300">
+    <div className={cn("space-y-2 rounded-lg bg-slate-50", compact ? "p-3" : "p-4")}>
       <label className="text-sm font-medium text-gray-700">Type</label>
       <Select
         onValueChange={(value) => {
@@ -180,7 +203,7 @@ const handleScanComplete = (scannedData) => {
         }}
         value={type}
       >
-        <SelectTrigger className="w-[180px] bg-white/80 border border-blue-200 focus:ring-2 focus:ring-purple-200">
+        <SelectTrigger className="w-[180px] bg-white border border-slate-200">
           <SelectValue placeholder="Select type" />
         </SelectTrigger>
         <SelectContent className="bg-white">
@@ -191,7 +214,7 @@ const handleScanComplete = (scannedData) => {
     </div>
 
     {/* AMOUNT + ACCOUNT */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-white/70 shadow-sm hover:shadow-md transition-all duration-300">
+    <div className={cn("grid grid-cols-1 gap-4 rounded-lg bg-slate-50 md:grid-cols-2", compact ? "p-3" : "p-4")}>
       
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-700">Amount</label>
@@ -200,7 +223,7 @@ const handleScanComplete = (scannedData) => {
           step="0.01"
           placeholder="0.00"
           {...register("amount")}
-          className="bg-white/80 border border-blue-200 focus:ring-2 focus:ring-purple-200"
+          className="bg-white border border-slate-200"
         />
         {errors.amount && (
           <p className="text-sm text-red-500">{errors.amount.message}</p>
@@ -213,7 +236,7 @@ const handleScanComplete = (scannedData) => {
           onValueChange={(value) => setValue("accountId", value)}
           value={accountId}
         >
-          <SelectTrigger className="bg-white/80 border border-blue-200 focus:ring-2 focus:ring-purple-200">
+          <SelectTrigger className="bg-white border border-slate-200">
             <SelectValue placeholder="Select account" />
           </SelectTrigger>
           <SelectContent className="bg-white">
@@ -231,7 +254,7 @@ const handleScanComplete = (scannedData) => {
         </Select>
       </div>
     </div>
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-white/70 shadow-sm">
+<div className={cn("grid grid-cols-1 gap-4 rounded-lg bg-slate-50 md:grid-cols-2", compact ? "p-3" : "p-4")}>
   
     {/* CATEGORY + DATE*/}
     <div className="space-y-2"> 
@@ -259,14 +282,14 @@ const handleScanComplete = (scannedData) => {
     </div>
 
     {/* DATE */}
-    <div className="space-y-2 p-4 rounded-xl bg-white/70 shadow-sm hover:shadow-md transition-all duration-300">
+    <div className="space-y-2">
       <label className="text-sm font-medium text-gray-700">Date</label>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             className={cn(
-              "w-full pl-3 text-left bg-white/80 border border-blue-200 hover:bg-blue-50",
+              "w-full pl-3 text-left bg-white border border-slate-200 hover:bg-slate-50",
               !date && "text-muted-foreground"
             )}
           >
@@ -285,17 +308,17 @@ const handleScanComplete = (scannedData) => {
     </div>
 </div>
     {/* DESCRIPTION */}
-    <div className="space-y-2 p-4 rounded-xl bg-white/70 shadow-sm hover:shadow-md transition-all duration-300">
+    <div className={cn("space-y-2 rounded-lg bg-slate-50", compact ? "p-3" : "p-4")}>
       <label className="text-sm font-medium text-gray-700">Description</label>
       <Input
         placeholder="Enter description"
         {...register("description")}
-        className="bg-white/80 border border-blue-200 focus:ring-2 focus:ring-purple-200"
+        className="bg-white border border-slate-200"
       />
     </div>
 
     {/* RECURRING */}
-    <div className="flex items-center justify-between p-4 rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50 shadow-sm">
+    <div className={cn("flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50", compact ? "p-3" : "p-4")}>
       <div>
         <label className="font-medium">Recurring Transaction</label>
         <p className="text-sm text-muted-foreground">
@@ -307,7 +330,7 @@ const handleScanComplete = (scannedData) => {
         onCheckedChange={(checked) => setValue("isRecurring", checked)}
       />
     </div>
-    {/* Recurring Interval */} {isRecurring && ( <div className="space-y-2"> <label className="text-sm font-medium">Recurring Interval</label> <Select onValueChange={(value) => setValue("recurringInterval", value)} defaultValue={getValues("recurringInterval")} > <SelectTrigger > <SelectValue placeholder="Select interval" /> </SelectTrigger> <SelectContent className="bg-slate-50"> <SelectItem value="DAILY">Daily</SelectItem> <SelectItem value="WEEKLY">Weekly</SelectItem> <SelectItem value="MONTHLY">Monthly</SelectItem> <SelectItem value="YEARLY">Yearly</SelectItem> </SelectContent> </Select> {errors.recurringInterval && ( <p className="text-sm text-red-500"> {errors.recurringInterval.message} </p> )} </div> )}
+    {/* Recurring Interval */} {isRecurring && ( <div className={cn("space-y-2 rounded-lg bg-slate-50", compact ? "p-3" : "p-4")}> <label className="text-sm font-medium">Recurring Interval</label> <Select onValueChange={(value) => setValue("recurringInterval", value)} defaultValue={getValues("recurringInterval")} > <SelectTrigger className="bg-white" > <SelectValue placeholder="Select interval" /> </SelectTrigger> <SelectContent className="bg-slate-50"> <SelectItem value="DAILY">Daily</SelectItem> <SelectItem value="WEEKLY">Weekly</SelectItem> <SelectItem value="MONTHLY">Monthly</SelectItem> <SelectItem value="YEARLY">Yearly</SelectItem> </SelectContent> </Select> {errors.recurringInterval && ( <p className="text-sm text-red-500"> {errors.recurringInterval.message} </p> )} </div> )}
 
     {/* BUTTONS */}
     <div className="flex gap-4">
@@ -315,14 +338,15 @@ const handleScanComplete = (scannedData) => {
         type="button"
         variant="outline"
         className="w-full border-blue-300 text-blue-600 hover:bg-blue-50"
-        onClick={() => router.back()}
+        onClick={() => (onCancel ? onCancel() : router.back())}
+        disabled={transactionLoading}
       >
         Cancel
       </Button>
 
       <Button
         type="submit"
-        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md transition-all duration-200 hover:shadow-lg"
         disabled={transactionLoading}
       >
         {transactionLoading ? (

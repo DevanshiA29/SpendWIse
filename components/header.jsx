@@ -1,13 +1,25 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
-import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { Button } from './ui/button'
-import { DivideIcon, LayoutDashboard, PenBox, Wallet, Sparkles } from 'lucide-react'
+import { PenBox, Wallet, Sparkles } from 'lucide-react'
 import { checkUser } from '@/lib/checkUser'
+import { getUserAccounts } from '@/actions/dashboard'
+import { defaultCategories } from '@/data/categories'
+import { TransactionDialogButton } from './transaction-dialog-button'
 
 const Header = async () => {
-  await checkUser();
+  const user = await checkUser();
+  let accounts = [];
+
+  if (user) {
+    try {
+      accounts = await getUserAccounts();
+    } catch {
+      accounts = [];
+    }
+  }
+
   return (
     <div className='fixed top-0 w-full bg-white/70 backdrop-blur-2xl z-50 border-b border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.02)] transition-all duration-300' >
       <nav className='container mx-auto px-4 py-4 flex items-center justify-between'>
@@ -39,12 +51,7 @@ const Header = async () => {
              </Button>
             </Link>
 
-            <Link href={"/transaction/create"}>
-             <Button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full shadow-[0_4px_14px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.4)] transition-all duration-300 hover:-translate-y-0.5">
-              <LayoutDashboard size={18} />
-              <span className='hidden md:inline font-semibold'>Transactions</span>
-             </Button>
-            </Link>
+            <TransactionDialogButton accounts={accounts || []} categories={defaultCategories} />
             <div className="ml-2 ring-2 ring-white rounded-full shadow-md">
               <UserButton appearance={{elements: { avatarBox: "w-10 h-10" }}}/>
             </div>

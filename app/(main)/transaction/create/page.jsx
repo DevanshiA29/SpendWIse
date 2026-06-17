@@ -7,7 +7,6 @@ export default async function AddTransactionPage({ searchParams }) {
   const accounts = await getUserAccounts();
   const resolvedParams = await searchParams;
   const editId = resolvedParams?.edit;
-  console.log(editId);
   let initialData = null;
   if (editId) {
     const transaction = await getTransaction(editId);

@@ -11,7 +11,6 @@ import { DashboardOverview } from './_component/transaction-overview'
 const DashboardPage = async () => {
     await checkUser();
     const accounts = await getUserAccounts();
-    //  console.log(accounts);
     const defaultAccount = accounts?.find((account) =>account.isDefault);
     let budgetData =null;
     if(defaultAccount){

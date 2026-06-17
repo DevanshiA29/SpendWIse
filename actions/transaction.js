@@ -6,8 +6,7 @@ import { revalidatePath } from "next/cache";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
-import { sendEmail } from "@/actions/send-email";
-import EmailTemplate from "@/emails/template";
+import { inngest } from "@/lib/inngest/client";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -96,7 +95,7 @@ export async function createTransaction(data) {
     revalidatePath(`/account/${transaction.accountId}`);
 
     if (data.type === "EXPENSE") {
-      await sendBudgetAlertIfNeeded(user, data.accountId);
+      await queueBudgetAlertCheck(user.id, data.accountId);
     }
 
     return { success: true, data: serializeAmount(transaction) };
@@ -195,7 +194,7 @@ export async function updateTransaction(id, data) {
     revalidatePath(`/account/${data.accountId}`);
 
     if (data.type === "EXPENSE") {
-      await sendBudgetAlertIfNeeded(user, data.accountId);
+      await queueBudgetAlertCheck(user.id, data.accountId);
     }
 
     return { success: true, data: serializeAmount(transaction) };
@@ -332,65 +331,13 @@ function calculateNextRecurringDate(startDate, interval) {
   return date;
 }
 
-async function sendBudgetAlertIfNeeded(user, accountId) {
-  const budget = await db.budget.findUnique({
-    where: { userId: user.id },
-  });
-
-  if (!budget || budget.amount.toNumber() <= 0) return;
-
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
-  const expenses = await db.transaction.aggregate({
-    where: {
-      userId: user.id,
-      accountId,
-      type: "EXPENSE",
-      date: {
-        gte: startOfMonth,
-        lt: startOfNextMonth,
-      },
-    },
-    _sum: {
-      amount: true,
-    },
-  });
-
-  const totalExpenses = expenses._sum.amount?.toNumber() || 0;
-  const budgetAmount = budget.amount.toNumber();
-  const percentageUsed = (totalExpenses / budgetAmount) * 100;
-  const alreadySentThisMonth =
-    budget.lastAlertSent &&
-    budget.lastAlertSent.getMonth() === now.getMonth() &&
-    budget.lastAlertSent.getFullYear() === now.getFullYear();
-
-  if (percentageUsed < 80 || alreadySentThisMonth) return;
-
-  const account = await db.account.findUnique({
-    where: { id: accountId, userId: user.id },
-  });
-
-  const emailResult = await sendEmail({
-    to: user.email,
-    subject: `SpendWise budget alert for ${account?.name || "your account"}`,
-    react: EmailTemplate({
-      userName: user.name,
-      type: "budget-alert",
-      data: {
-        budgetAmount,
-        totalExpenses,
-        percentageUsed,
-        accountName: account?.name,
-      },
-    }),
-  });
-
-  if (emailResult.success) {
-    await db.budget.update({
-      where: { id: budget.id },
-      data: { lastAlertSent: now },
+async function queueBudgetAlertCheck(userId, accountId) {
+  try {
+    await inngest.send({
+      name: "budget.alert.check",
+      data: { userId, accountId },
     });
+  } catch (error) {
+    console.error("Failed to queue budget alert check:", error);
   }
 }

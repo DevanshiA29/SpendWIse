@@ -4,7 +4,7 @@ import { updateDefaultAccount } from '@/actions/dashboard';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import useFetch from '@/hooks/use-fetch';
-import { ArrowUpRight, ArrowDownRight, ArrowRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ const AccountCard = ({ account }) => {
         loading: updateDefaultLoading,
         data: updatedAccount,
         error,
+        fn: updateDefaultFn,
     } = useFetch(updateDefaultAccount);
 
     const handleDefaultChange = async (event) => {
@@ -27,7 +28,11 @@ const AccountCard = ({ account }) => {
             toast.warning("At least 1 default account is required");
             return;
         }
-        await updateDefaultAccount(id);
+        try {
+            await updateDefaultFn(id);
+        } catch {
+            // useFetch already shows the toast and stores the error state.
+        }
     };
 
     useEffect(() => {
@@ -67,36 +72,35 @@ const AccountCard = ({ account }) => {
             {/* Glowing background effect on hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none" />
 
-            {/* Hover details overlay button at center bottom */}
-            <div className="absolute inset-x-0 bottom-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 pointer-events-none translate-y-4 group-hover:translate-y-0">
-                <div className="bg-background/95 backdrop-blur-md border border-primary/20 px-5 py-2 rounded-full shadow-lg text-sm font-semibold flex items-center gap-2 text-primary">
-                    View details <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </div>
-            </div>
-
             {/* Card Content Layout */}
-            <div className="relative z-20 flex justify-between items-start p-6 pointer-events-none h-full">
+            <div className="relative z-20 grid h-full min-h-[170px] grid-cols-[minmax(0,1fr)_auto] gap-4 p-6 pointer-events-none">
                 {/* Left Side: Account Name and Balance */}
-                <div className="flex flex-col justify-between h-full gap-4">
+                <div className="flex min-w-0 flex-col justify-between gap-5">
                     <div>
-                        <h3 className="text-lg font-bold capitalize tracking-tight text-foreground/90">{name}</h3>
+                        <h3 className="truncate text-lg font-bold capitalize tracking-tight text-foreground/90">{name}</h3>
                         <p className="text-xs text-muted-foreground capitalize mt-0.5">{type} Account</p>
                     </div>
                     
-                    <div className="mt-4">
-                        <div className="text-3xl font-extrabold tracking-tight text-foreground">
+                    <div>
+                        <div className="break-words text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
                             {formatCurrency(balance)}
                         </div>
+                        <p className="mt-2 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                            Open account details
+                        </p>
                     </div>
                 </div>
 
                 {/* Right Side: Switch, Income and Expense */}
-                <div className="flex flex-col items-end gap-3 h-full justify-between">
+                <div className="flex h-full flex-col items-end justify-between gap-3">
                     <div 
-                        className="pointer-events-auto flex items-center gap-2" 
+                        className="pointer-events-auto flex min-h-6 items-center gap-2" 
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <span className="text-xs text-muted-foreground font-medium">Default</span>
+                        <span className="text-xs text-muted-foreground font-medium">
+                            {updateDefaultLoading ? "Updating..." : "Default"}
+                        </span>
+                        {updateDefaultLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
                         <Switch 
                             checked={isDefault}
                             onClick={handleDefaultChange}

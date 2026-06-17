@@ -55,7 +55,6 @@ export function CreateAccountDrawer({ children }) {
   } = useFetch(createAccount);
 
   const onSubmit = async (data) => {
-    console.log("submit and create", data);
     await createAccountFn(data);
   };
 
