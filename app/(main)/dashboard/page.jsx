@@ -9,7 +9,7 @@ import { getCurrentBudget } from '@/actions/budget'
 import { BudgetProgress } from './_component/budget-progress'
 import { DashboardOverview } from './_component/transaction-overview'
 import { processCurrentUserRecurringSafely } from '@/lib/current-user-recurring'
-import { RefreshCw } from 'lucide-react'
+import { RecurringAutomationNotice } from '@/components/recurring-automation-notice'
 const DashboardPage = async () => {
     await checkUser();
     const recurringResult = await processCurrentUserRecurringSafely();
@@ -23,20 +23,7 @@ const DashboardPage = async () => {
     const transactions = await getDashboardData();
     return (
         <div className="px-5 space-y-8">
-            <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-                <div className="flex items-start gap-3">
-                    <RefreshCw className="mt-0.5 h-4 w-4 shrink-0" />
-                    <div>
-                        <p className="font-semibold">Recurring automation is active</p>
-                        <p className="text-blue-800">
-                            Due recurring transactions are checked whenever you open the dashboard, plus by the daily backup job.
-                            {recurringResult?.processed > 0
-                                ? ` ${recurringResult.processed} due transaction${recurringResult.processed === 1 ? "" : "s"} processed just now.`
-                                : " Nothing was due right now."}
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <RecurringAutomationNotice initialProcessed={recurringResult?.processed || 0} />
             {/* Budget Progress - Placeholder for now */}
              {defaultAccount&&(
                 <BudgetProgress

@@ -163,5 +163,12 @@ export const defaultCategories = [
 
 export const categoryColors = defaultCategories.reduce((acc, category) => {
   acc[category.id] = category.color;
+  acc[category.name] = category.color;
+  return acc;
+}, {});
+
+export const categoryLabels = defaultCategories.reduce((acc, category) => {
+  acc[category.id] = category.name;
+  acc[category.name] = category.name;
   return acc;
 }, {});

@@ -49,7 +49,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { categoryColors } from "@/data/categories";
+import { categoryColors, categoryLabels } from "@/data/categories";
 import { bulkDeleteTransactions } from "@/actions/accounts";
 import useFetch from "@/hooks/use-fetch";
 import { BarLoader } from "react-spinners";
@@ -64,6 +64,9 @@ const RECURRING_INTERVALS = {
   MONTHLY: "Monthly",
   YEARLY: "Yearly",
 };
+
+const isPostedRecurring = (transaction) =>
+  !transaction.isRecurring && transaction.description?.endsWith("(Recurring)");
 
 export function TransactionTable({ transactions }) {
   const router = useRouter();
@@ -99,10 +102,12 @@ export function TransactionTable({ transactions }) {
       result = result.filter((t) => t.type === typeFilter);
     }
 
-    if (recurringFilter === "recurring") {
+    if (recurringFilter === "scheduled") {
       result = result.filter((t) => t.isRecurring);
-    } else if (recurringFilter === "non-recurring") {
-      result = result.filter((t) => !t.isRecurring);
+    } else if (recurringFilter === "posted-recurring") {
+      result = result.filter((t) => isPostedRecurring(t));
+    } else if (recurringFilter === "manual") {
+      result = result.filter((t) => !t.isRecurring && !isPostedRecurring(t));
     }
 
     result.sort((a, b) => {
@@ -234,10 +239,9 @@ export function TransactionTable({ transactions }) {
               <SelectValue placeholder="All Transactions" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="recurring">Recurring Only</SelectItem>
-              <SelectItem value="non-recurring">
-                Non-recurring Only
-              </SelectItem>
+              <SelectItem value="scheduled">Recurring schedules</SelectItem>
+              <SelectItem value="posted-recurring">Posted recurring</SelectItem>
+              <SelectItem value="manual">Manual only</SelectItem>
             </SelectContent>
           </Select>
 
@@ -317,7 +321,11 @@ export function TransactionTable({ transactions }) {
                   <TableCell className="whitespace-nowrap">
                     <div className="font-medium">{format(new Date(t.date), "PP")}</div>
                     <div className="text-xs text-muted-foreground">
-                      {t.isRecurring ? "Auto-posted" : "Manual"}
+                      {t.isRecurring
+                        ? "Schedule template"
+                        : isPostedRecurring(t)
+                          ? "Posted automatically"
+                          : "Manual"}
                     </div>
                   </TableCell>
 
@@ -329,10 +337,10 @@ export function TransactionTable({ transactions }) {
 
                   <TableCell>
                     <span
-                      style={{ background: categoryColors[t.category] }}
+                      style={{ background: categoryColors[t.category] || "#64748b" }}
                       className="px-2 py-1 rounded text-white text-sm"
                     >
-                      {t.category}
+                      {categoryLabels[t.category] || t.category || "Uncategorized"}
                     </span>
                   </TableCell>
 
@@ -362,6 +370,20 @@ export function TransactionTable({ transactions }) {
                           <TooltipContent>
                             Next:{" "}
                             {format(new Date(t.nextRecurringDate), "PPP")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : isPostedRecurring(t) ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="secondary" className="gap-1 border-emerald-200 bg-emerald-50 text-emerald-700">
+                              <RefreshCw className="h-3 w-3" />
+                              Posted recurring
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Created automatically from a recurring schedule.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

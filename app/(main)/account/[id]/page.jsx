@@ -6,10 +6,10 @@ import { notFound } from "next/navigation";
 import { AccountChart } from "../_components/account-chart";
 import { formatCurrency } from "@/lib/currency";
 import { processCurrentUserRecurringSafely } from "@/lib/current-user-recurring";
-import { RefreshCw } from "lucide-react";
+import { RecurringAutomationNotice } from "@/components/recurring-automation-notice";
 
 export default async function AccountPage({ params }) {
-  await processCurrentUserRecurringSafely();
+  const recurringResult = await processCurrentUserRecurringSafely();
   const accountData = await getAccountWithTransactions(params.id);
 
   if (!accountData) {
@@ -41,14 +41,11 @@ export default async function AccountPage({ params }) {
         </div>
       </div>
 
-      <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-        <div className="flex items-start gap-3">
-          <RefreshCw className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>
-            Recurring transactions due today are checked automatically whenever this account is opened.
-          </p>
-        </div>
-      </div>
+      <RecurringAutomationNotice
+        accountId={account.id}
+        initialProcessed={recurringResult?.processed || 0}
+        compact
+      />
 
       {/* Chart Section */}
       <Suspense
