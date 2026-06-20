@@ -11,34 +11,16 @@ import {
   ArrowRight,
   TrendingUp,
   Zap,
-  Copy,
-  Check,
-  LockKeyhole,
-  Mail,
+  ShieldCheck,
 } from "lucide-react";
-
-const demoCredentials = {
-  email: "2k23.csaiml2313992@gmail.com",
-  password: "password",
-};
+import { DemoLoginButton } from "@/components/demo-login-button";
 
 const HeroSection = () => {
   const [isMounted, setIsMounted] = useState(false);
-  const [copiedField, setCopiedField] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const handleCopy = async (label, value) => {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopiedField(label);
-      window.setTimeout(() => setCopiedField(""), 1800);
-    } catch (error) {
-      console.error("Failed to copy demo credential", error);
-    }
-  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-32 pb-20 overflow-hidden bg-slate-50">
@@ -92,92 +74,39 @@ const HeroSection = () => {
             </Link>
           </div>
 
-          <div
-            className={`mt-10 max-w-2xl mx-auto transition-all duration-1000 delay-400 ${
-              isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
-            <div className="rounded-[2rem] border border-white/70 bg-white/85 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.08)] overflow-hidden text-left">
-              <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-purple-900 px-6 py-4 text-white">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-100/80">
-                      Demo Access
-                    </p>
-                    <h3 className="text-lg font-bold">
-                      Explore the live product instantly
-                    </h3>
-                  </div>
-                  <Link href="/sign-in">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="rounded-full bg-white/12 text-white hover:bg-white/20 border border-white/20"
-                    >
-                      Open Sign In
-                    </Button>
-                  </Link>
-                </div>
+        </div>
+
+        <div className={`mt-14 max-w-4xl mx-auto overflow-hidden rounded-[2rem] border border-white/60 bg-white/85 text-left shadow-[0_24px_70px_rgba(79,70,229,0.16)] backdrop-blur-2xl transition-all duration-1000 delay-500 ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
+          <div className="flex flex-col gap-5 bg-gradient-to-r from-slate-950 via-indigo-900 to-purple-800 p-6 text-white sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.35em] text-blue-200">
+                Demo Access
+              </p>
+              <h3 className="text-2xl font-extrabold">Explore the live product instantly</h3>
+            </div>
+            <DemoLoginButton
+              size="lg"
+              variant="outline"
+              className="border-white/25 bg-white/10 px-6 text-white hover:bg-white hover:text-slate-950"
+            >
+              Enter Demo Workspace
+            </DemoLoginButton>
+          </div>
+          <div className="grid gap-4 p-6 text-slate-700 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="flex items-start gap-3">
+              <div className="rounded-2xl bg-purple-50 p-3 text-purple-600">
+                <ShieldCheck className="h-5 w-5" />
               </div>
-
-              <div className="grid gap-4 p-5 sm:p-6">
-                <p className="text-sm leading-6 text-slate-600">
-                  Use these demo credentials to review the dashboard, budgets, analytics, and transaction flows without creating a new account.
+              <div>
+                <p className="font-semibold text-slate-900">Seeded demo account, no manual credentials.</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  One click signs you into a ready workspace with accounts, budgets, charts, recurring transactions, and transaction history.
                 </p>
-
-                <div className="grid gap-3">
-                  <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
-                      <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                        <Mail className="h-3.5 w-3.5" />
-                        Email
-                      </div>
-                      <p className="truncate text-sm font-semibold text-slate-800 sm:text-base">
-                        {demoCredentials.email}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="rounded-full"
-                      onClick={() => handleCopy("email", demoCredentials.email)}
-                    >
-                      {copiedField === "email" ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                      {copiedField === "email" ? "Copied" : "Copy"}
-                    </Button>
-                  </div>
-
-                  <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
-                      <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                        <LockKeyhole className="h-3.5 w-3.5" />
-                        Password
-                      </div>
-                      <p className="truncate font-mono text-sm font-semibold text-slate-800 sm:text-base">
-                        {demoCredentials.password}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="rounded-full"
-                      onClick={() => handleCopy("password", demoCredentials.password)}
-                    >
-                      {copiedField === "password" ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                      {copiedField === "password" ? "Copied" : "Copy"}
-                    </Button>
-                  </div>
-                </div>
               </div>
             </div>
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700">
+              Live data included
+            </span>
           </div>
         </div>
 

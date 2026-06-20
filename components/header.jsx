@@ -7,6 +7,7 @@ import { checkUser } from '@/lib/checkUser'
 import { getUserAccounts } from '@/actions/dashboard'
 import { defaultCategories } from '@/data/categories'
 import { TransactionDialogButton } from './transaction-dialog-button'
+import { DemoLoginButton } from './demo-login-button'
 
 const Header = async () => {
   const user = await checkUser();
@@ -58,6 +59,12 @@ const Header = async () => {
           </SignedIn>
 
           <SignedOut>
+            <DemoLoginButton
+              variant="outline"
+              className="border-purple-200 bg-white/80 px-4 text-purple-700 shadow-sm hover:bg-purple-50 hover:text-purple-800 sm:px-5"
+            >
+              Demo Login
+            </DemoLoginButton>
             <SignInButton mode="modal" forceRedirectUrl="/dashboard">
               <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-full px-8 shadow-[0_4px_14px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.4)] transition-all duration-300 hover:-translate-y-0.5">
                 Login
